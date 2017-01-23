@@ -7,6 +7,10 @@ template <typename keyType, unsigned int NNNL>
 class vNode{
     vector<uint64_t> values;
     vector<keyType> keys;
+    public:
+    uint64_t keycount() {
+        return keys.size();
+    }
     class arrayHash {
         public:
               std::size_t operator()(std::array<unsigned char, NNNL/8> const &arr) const {
@@ -190,11 +194,13 @@ public:
     static const uint64_t MAXHASH = 2145390523ULL;
     unsigned char get8bit(keyType k) {
         uint8_t ans = 0;
-        while (k) {
-            ans ^=k;
-            k>>=8;
+        uint8_t * pk = (uint8_t *) &k;
+        for (int q = 0; q <8; q++) {
+            ans ^= *pk;
+            pk++;
         }
-        if (ans ==0) return 0x5D;
+        if (ans ==0) return k | 0x1;
+        return ans;
     }
     uint64_t gethash(keyType k) {
         __uint128_t vv = k;
@@ -272,7 +278,9 @@ public:
             while ((1<<LLfreq)<NNNL) LLfreq++;
             freqOth = new Othello<keyType> (LLfreq, kV, vV, true,10);
         }
-
+        for (int i = 0 ; i < vNodes.size(); i++)
+            printf("%d \t",vNodes[i]->keycount());
+        printf("\n");
         for (int i = 0 ; i < vNodes.size(); i++)
             vNodes[i]->construct();
 
